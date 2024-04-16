@@ -8,7 +8,7 @@ using DevPartners_CodingTest.Models;
 
 namespace DevPartners_CodingTest.Controllers
 {
-    [Route("api/[controller]/id/stations/3680/readings")]
+    [Route("api/[controller]")]
     [ApiController]
     public class RainfallController : ControllerBase
     {
@@ -20,12 +20,16 @@ namespace DevPartners_CodingTest.Controllers
         }
 
         // GET: api/Rainfall
-        [HttpGet]
-        public async Task<IActionResult> GetReadings(string id)
+        [HttpGet("id/{stationId}/readings")]
+        [ProducesResponseType(StatusCodes.Status200OK)]
+        [ProducesResponseType(StatusCodes.Status204NoContent)]
+        [ProducesResponseType(StatusCodes.Status404NotFound)]
+        [ProducesResponseType(StatusCodes.Status500InternalServerError)]
+        public async Task<IActionResult> GetReadings([FromRoute] string stationId, [FromQuery] int count = 10)
         {
             //fetching from url
             var client = _clientFactory.CreateClient();
-            var response = await client.GetAsync($"https://environment.data.gov.uk/flood-monitoring/id/stations/{id}/readings?_sorted&_limit=100");
+            var response = await client.GetAsync($"https://environment.data.gov.uk/flood-monitoring/id/stations/{stationId}/readings?_sorted&_limit=100");
 
             if (response.IsSuccessStatusCode)
             {
