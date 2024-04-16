@@ -23,9 +23,11 @@ namespace DevPartners_CodingTest.Controllers
         [HttpGet]
         public async Task<IActionResult> GetReadings(string id)
         {
+            //fetching from url
             var client = _clientFactory.CreateClient();
             var response = await client.GetAsync($"https://environment.data.gov.uk/flood-monitoring/id/stations/3680/readings?_sorted&_limit=100");
 
+            //only get the "items" on the provided api
             var responseString = await response.Content.ReadAsStringAsync();
             var jsonResponse = JsonDocument.Parse(responseString);
             var items = jsonResponse.RootElement.GetProperty("items");
