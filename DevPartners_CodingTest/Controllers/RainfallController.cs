@@ -25,14 +25,28 @@ namespace DevPartners_CodingTest.Controllers
         {
             //fetching from url
             var client = _clientFactory.CreateClient();
-            var response = await client.GetAsync($"https://environment.data.gov.uk/flood-monitoring/id/stations/3680/readings?_sorted&_limit=100");
+            var response = await client.GetAsync($"https://environment.data.gov.uk/flood-monitoring/id/stations/{id}/readings?_sorted&_limit=100");
 
-            //only get the "items" on the provided api
-            var responseString = await response.Content.ReadAsStringAsync();
-            var jsonResponse = JsonDocument.Parse(responseString);
-            var items = jsonResponse.RootElement.GetProperty("items");
-            var readings = JsonSerializer.Deserialize<List<Rainfall>>(items.GetRawText());
-            return Ok(readings);
+            if (response.IsSuccessStatusCode)
+            {
+                //only get the "items" on the provided api
+                var responseString = await response.Content.ReadAsStringAsync();
+                var jsonResponse = JsonDocument.Parse(responseString);
+                var items = jsonResponse.RootElement.GetProperty("items");
+                var readings = JsonSerializer.Deserialize<List<Rainfall>>(items.GetRawText());
+
+                if (readings.Count == 0)
+                {
+                    return NoContent();
+                }
+                return Ok(readings);
+            } else if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+            {
+                return BadRequest();
+            } else
+            {
+                return StatusCode(500);
+            }
         }
 
     }
