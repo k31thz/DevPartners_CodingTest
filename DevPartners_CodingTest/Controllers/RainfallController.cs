@@ -49,9 +49,13 @@ namespace DevPartners_CodingTest.Controllers
                     }
                     return Ok(readings); // Otherwise, return an Ok result with the readings
                 }
-                else
+                else if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
                 {
                     return BadRequest(); // If the status code is BadRequest, return a BadRequest result
+                }
+                else
+                {
+                    return StatusCode(500);
                 }
             } catch (Exception e)
             {
