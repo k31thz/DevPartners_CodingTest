@@ -14,7 +14,6 @@ namespace DevPartners_CodingTest.Tests
 {
     public class RainfallControllerTests
     {
-        private readonly ILogger<RainfallControllerTests> _logger;
         private readonly Mock<IHttpClientFactory> _clientFactoryMock;
         private readonly RainfallController _controller;
 
@@ -22,7 +21,6 @@ namespace DevPartners_CodingTest.Tests
         {
             _clientFactoryMock = new Mock<IHttpClientFactory>();
             _controller = new RainfallController(_clientFactoryMock.Object);
-            _logger = LoggerFactory.Create(builder => builder.AddConsole()).CreateLogger<RainfallControllerTests>();
         }
 
         [Fact]
