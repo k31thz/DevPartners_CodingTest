@@ -14,9 +14,11 @@ namespace DevPartners_CodingTest.Tests
 {
     public class RainfallControllerTests
     {
+        // Declare fields 
         private readonly Mock<IHttpClientFactory> _clientFactoryMock;
         private readonly RainfallController _controller;
 
+        // Initialize fields in the constructor
         public RainfallControllerTests()
         {
             _clientFactoryMock = new Mock<IHttpClientFactory>();
@@ -28,7 +30,7 @@ namespace DevPartners_CodingTest.Tests
         {
             // Arrange
             var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
-            mockHttpMessageHandler.Protected()
+            mockHttpMessageHandler.Protected()  //Setup the protected sendasync method to return a successful response
                 .Setup<Task<HttpResponseMessage>>(
                     "SendAsync",
                     ItExpr.IsAny<HttpRequestMessage>(),
@@ -39,13 +41,14 @@ namespace DevPartners_CodingTest.Tests
                     StatusCode = HttpStatusCode.OK,
                     Content = new StringContent("{\"items\": [{\"value\": 1.0}]}", Encoding.UTF8, "application/json")
                 });
-
+            // Setup mock httpclient mimicing the controller logic
             var client = new HttpClient(mockHttpMessageHandler.Object);
             _clientFactoryMock.Setup(_ => _.CreateClient(It.IsAny<string>())).Returns(client);
 
-            // Act
+            // Act on the mocked httpclient
             var result = await _controller.GetReadings("3680");
             // Assert
+            // Check that the result is an OkObjectResult
             Assert.IsType<OkObjectResult>(result);
         }
 
@@ -56,7 +59,7 @@ namespace DevPartners_CodingTest.Tests
         {
             // Arrange
             var mockHttpMessageHandler = new Mock<HttpMessageHandler>();
-            mockHttpMessageHandler.Protected()
+            mockHttpMessageHandler.Protected()     // Setup the protected SendAsync method to return a response with the specified status code
                 .Setup<Task<HttpResponseMessage>>(
                     "SendAsync",
                     ItExpr.IsAny<HttpRequestMessage>(),
@@ -67,13 +70,15 @@ namespace DevPartners_CodingTest.Tests
                     StatusCode = statusCode,
                 });
 
+            // Setup mock httpclient mimicing the controller logic
             var client = new HttpClient(mockHttpMessageHandler.Object);
             _clientFactoryMock.Setup(_ => _.CreateClient(It.IsAny<string>())).Returns(client);
 
-            // Act
+            // Act on method with a wrong parameter
             var result = await _controller.GetReadings(stationId);
 
             // Assert
+            //Check that the result is a BadRequest result
             Assert.IsType<BadRequestResult>(result);
         }
     }
