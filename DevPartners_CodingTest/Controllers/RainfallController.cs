@@ -27,29 +27,35 @@ namespace DevPartners_CodingTest.Controllers
         [ProducesResponseType(StatusCodes.Status500InternalServerError)]
         public async Task<IActionResult> GetReadings([FromRoute] string stationId, [FromQuery] int count = 10)
         {
-            //fetching from url
-            var client = _clientFactory.CreateClient();
+            try
+            {
+                //fetching from url
+                var client = _clientFactory.CreateClient();
             var response = await client.GetAsync($"https://environment.data.gov.uk/flood-monitoring/id/stations/{stationId}/readings?_sorted&_limit=100");
 
-            if (response.IsSuccessStatusCode)
-            {
-                //only get the "items" on the provided api
-                var responseString = await response.Content.ReadAsStringAsync();
-                var jsonResponse = JsonDocument.Parse(responseString);
-                var items = jsonResponse.RootElement.GetProperty("items");
-                var readings = JsonSerializer.Deserialize<List<Rainfall>>(items.GetRawText());
 
-                if (readings.Count == 0)
+                if (response.IsSuccessStatusCode)
                 {
-                    return NoContent();
+                    //only get the "items" on the provided api
+                    // If the status code is successful, parse the response
+                    var responseString = await response.Content.ReadAsStringAsync();
+                    var jsonResponse = JsonDocument.Parse(responseString);
+                    var items = jsonResponse.RootElement.GetProperty("items");
+                    var readings = JsonSerializer.Deserialize<List<Rainfall>>(items.GetRawText());
+
+                    if (readings.Count == 0)
+                    {
+                        return NoContent(); // If there are no readings, return a NoContent result
+                    }
+                    return Ok(readings); // Otherwise, return an Ok result with the readings
                 }
-                return Ok(readings);
-            } else if (response.StatusCode == System.Net.HttpStatusCode.BadRequest)
+                else
+                {
+                    return BadRequest(); // If the status code is BadRequest, return a BadRequest result
+                }
+            } catch (Exception e)
             {
-                return BadRequest();
-            } else
-            {
-                return StatusCode(500);
+                return StatusCode(500, $"An unexpected error occurred: {e.Message}");
             }
         }
 
